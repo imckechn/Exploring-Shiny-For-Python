@@ -7,15 +7,23 @@ import matplotlib.pyplot as plt
 
 app_ui = ui.page_fluid(
     ui.h3("Animal Populations in Canada"),
-    ui.output_plot("plot"),
-    ui.output_table("table"),
+    ui.layout_sidebar(
+        ui.panel_sidebar(
+            ui.input_slider("n", "N", 2010, 2020, 1),
+        ),
+        ui.panel_main(
+            ui.output_plot("plot"),
+        ),
+    ),
+    #ui.output_plot("plot"),
+
 )
 
 
 def server(input, output, session):
 
-    def importCattleData():
-        df = pd.read_csv('http://gbadske.org:9000/GBADsLivestockPopulation/faostat?year=2017&country=Canada&species=*&format=file')
+    def importCattleData(year):
+        df = pd.read_csv('http://gbadske.org:9000/GBADsLivestockPopulation/faostat?year=' + str(year) + '&country=Canada&species=*&format=file')
         print(df.keys)
         return df
 
@@ -32,7 +40,7 @@ def server(input, output, session):
     @output
     @render.plot(alt="A histogram")
     def plot():
-        df = importCattleData()
+        df = importCattleData(input.n())
 
         np.random.seed(1)
         x = 100 + 15 * np.random.randn(437)
